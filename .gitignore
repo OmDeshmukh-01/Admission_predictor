@@ -85,3 +85,19 @@ temp/
 
 # Dataset (if large)
 # backend/dataset/
+# Python
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+*.pyc
+*.pyo
+
+# Node
+frontend/node_modules/
+frontend/build/
+
+# macOS
+.DS_Store
+
+# Environment files
+.env
