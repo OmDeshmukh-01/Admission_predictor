@@ -21,12 +21,14 @@ const DashboardPage = () => {
     const [scatter, setScatter] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    const API = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const kpiRes = await axios.get('http://localhost:8000/api/analytics/kpis');
-                const distRes = await axios.get('http://localhost:8000/api/analytics/distributions');
-                const scatterRes = await axios.get('http://localhost:8000/api/analytics/scatter');
+                const kpiRes = await axios.get(`${API}/api/analytics/kpis`);
+                const distRes = await axios.get(`${API}/api/analytics/distributions`);
+                const scatterRes = await axios.get(`${API}/api/analytics/scatter`);
                 
                 setKpis(kpiRes.data);
                 setDist(distRes.data);

@@ -21,11 +21,13 @@ const PredictPage = () => {
         setFormData({ ...formData, [e.target.name]: parseFloat(e.target.value) });
     };
 
+    const API = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
     const predict = async () => {
         setLoading(true);
         setError('');
         try {
-            const res = await axios.post('http://localhost:8000/api/predict/', formData);
+            const res = await axios.post(`${API}/api/predict/`, formData);
             setResult(res.data);
         } catch (err) {
             setError('Prediction failed. Ensure backend models are trained and server is running.');
