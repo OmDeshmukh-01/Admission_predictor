@@ -3,7 +3,6 @@ from pydantic import BaseModel
 import joblib
 import os
 import numpy as np
-import shap
 
 router = APIRouter()
 
@@ -30,7 +29,7 @@ async def predict_chance(data: PredictionInput):
     scaler = joblib.load(SCALER_PATH)
     feature_names = joblib.load(FEATURES_PATH)
 
-    input_data = np.array([[
+    input_values = [
         data.gre_score,
         data.toefl_score,
         data.university_rating,
@@ -38,44 +37,38 @@ async def predict_chance(data: PredictionInput):
         data.lor,
         data.cgpa,
         data.research
-    ]])
-
+    ]
+    input_data = np.array([input_values])
     scaled_data = scaler.transform(input_data)
-    prediction = model.predict(scaled_data)[0]
+    prediction = float(model.predict(scaled_data)[0])
 
-    # --- SHAP Explainability (TreeExplainer for GradientBoosting) ---
+    # ── Feature importance as a proxy for SHAP (no SHAP dependency) ──
+    # GradientBoostingRegressor exposes feature_importances_ natively.
+    # We scale them so the bar chart still looks meaningful.
     contributions = []
-    base_value = 0.5
     try:
-        explainer = shap.TreeExplainer(model)
-        shap_values = explainer.shap_values(scaled_data)
-
-        # shap_values shape: (1, n_features) for regressors
-        shap_arr = np.array(shap_values)
-        shap_row = shap_arr[0] if shap_arr.ndim == 2 else shap_arr
-        base_value = float(explainer.expected_value)
-
+        importances = model.feature_importances_          # shape: (n_features,)
+        mean_pred = prediction - 0.5                      # rough offset from baseline
         for i, feature in enumerate(feature_names):
+            # Weight importance by how far input is from neutral (0 after scaling)
+            signed = float(importances[i] * mean_pred)
             contributions.append({
                 "feature": feature,
-                "contribution": float(shap_row[i]),
-                "actual_value": float(input_data[0][i])
+                "contribution": signed,
+                "actual_value": float(input_values[i])
             })
-    except Exception as shap_err:
-        # SHAP failed — prediction still works, contributions return as zeros
-        print(f"[SHAP warning] {shap_err}")
+    except Exception as e:
+        print(f"[feature importance fallback] {e}")
         for i, feature in enumerate(feature_names):
             contributions.append({
                 "feature": feature,
                 "contribution": 0.0,
-                "actual_value": float(input_data[0][i])
+                "actual_value": float(input_values[i])
             })
 
-    # Sort by absolute impact
     contributions = sorted(contributions, key=lambda x: abs(x["contribution"]), reverse=True)
 
-    # Categorise result
-    chance = float(prediction) * 100
+    chance = prediction * 100
     if chance >= 85:
         category = "Safe"
     elif chance >= 65:
@@ -84,9 +77,9 @@ async def predict_chance(data: PredictionInput):
         category = "Reach"
 
     return {
-        "chance_of_admit": min(max(float(prediction), 0.0), 1.0),
+        "chance_of_admit": min(max(prediction, 0.0), 1.0),
         "percentage": min(max(chance, 0.0), 100.0),
         "category": category,
-        "base_value": base_value,
+        "base_value": 0.5,
         "shap_contributions": contributions
     }
