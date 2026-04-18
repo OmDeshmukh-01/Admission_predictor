@@ -7,7 +7,8 @@ xgboost>=2.0.0
 shap>=0.40.0
 
 # Deep Learning Framework
-tensorflow>=2.13.0
+# Use tensorflow-cpu for cloud/server deployments (no GPU wheels needed)
+tensorflow-cpu>=2.13.0,<2.16.0
 
 # Web Framework (FastAPI)
 fastapi>=0.103.0
