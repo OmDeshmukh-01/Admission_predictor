@@ -7,8 +7,8 @@ xgboost>=2.0.0
 shap>=0.40.0
 
 # Deep Learning Framework
-# Use tensorflow-cpu for cloud/server deployments (no GPU wheels needed)
-tensorflow-cpu>=2.13.0,<2.16.0
+# Pinned exact version - has confirmed wheels for Python 3.9-3.11 on Linux x86_64
+tensorflow-cpu==2.15.1
 
 # Web Framework (FastAPI)
 fastapi>=0.103.0
