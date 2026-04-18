@@ -3,6 +3,8 @@ import axios from 'axios';
 import { Target, TrendingUp, AlertCircle, Info } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
 
+const API = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
 const PredictPage = () => {
     const [formData, setFormData] = useState({
         gre_score: 310,
@@ -20,8 +22,6 @@ const PredictPage = () => {
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: parseFloat(e.target.value) });
     };
-
-    const API = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
     const predict = async () => {
         setLoading(true);

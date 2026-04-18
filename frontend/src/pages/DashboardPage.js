@@ -3,6 +3,8 @@ import axios from 'axios';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, ScatterChart, Scatter } from 'recharts';
 import { Users, Target, BookOpen, GraduationCap } from 'lucide-react';
 
+const API = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
 const KPICard = ({ title, value, icon: Icon, color }) => (
     <div className="glass-card p-6 flex flex-col space-y-4">
         <div className="flex justify-between items-center">
@@ -20,8 +22,6 @@ const DashboardPage = () => {
     const [dist, setDist] = useState(null);
     const [scatter, setScatter] = useState(null);
     const [loading, setLoading] = useState(true);
-
-    const API = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
     useEffect(() => {
         const fetchData = async () => {
